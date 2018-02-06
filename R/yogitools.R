@@ -1,0 +1,451 @@
+#' Get CLI argument
+#' 
+#' Retrieves a user-supplied argument command-line argument
+#' with a given name. Argument syntax: name=value
+#' 
+#' @param name The name of the command line argument
+#' @param default If no value was given by the user, default to this
+#' @param required Whether the argument is required or not. If TRUE,
+#'   an error is raised when no value was provided.
+#' @export
+#' @examples
+#' \dontrun{
+#' infile <- getArg("inputFile",required=TRUE)
+#' userIQ <- getArg("userIQ",default=0)
+#' }
+getArg <- function(name, default=NULL, required=FALSE) {
+
+	if (length(commandArgs(TRUE)) == 0) {
+		if (required) {
+			stop("Required argument:",name)
+		} else {
+			return(default)
+		}
+	}
+
+	#tabulate arguments by name
+	argTable <- do.call(rbind,strsplit(commandArgs(TRUE),"="))
+	#get index of argument with given name
+	i <- which(argTable[,1] == name)
+
+
+	if (length(i) == 0) {
+		#return default value if no matching arguments are found.
+		if (required) {
+			stop("Required argument:",name)
+		} else {
+			return(default)
+		}
+	} else if (length(i) > 1) {
+		#if multiple matches are found, throw error message.
+		stop("Multiple values for", name, "found!")
+	} else {
+		#if everything checks out, return the argument value
+		return(argTable[i,2])
+	}
+}
+
+#' Create new Counter
+#'
+#' This constructor method creates an object that can count 
+#' occurrences of different items. It allows importing and exporting
+#' of the counter status in string form.
+#' 
+#' The object has the following methods:
+#' \begin{itemize}
+#'  \item \code{inc(id)}: Increase the counter for item with \code{id} by 1.
+#'  \item \code{add(id,x)}: Add \code{x} occurrences for the item with \code{id}.
+#'  \item \code{get(id)}: Get the number of occurrences seen for item \code{id}.
+#'  \item \code{ls(id)}: List all counts for all items by id.
+#'  \item \code{export(id)}: Exports the counter state to a string that can be saved or logged.
+#'  \item \code{import.add(str)} Imports a previous counter state from the string \code{str} 
+#'      and adds it to the current counts.
+#' \end{itemize}
+#' 
+#' @return An object of type \code{yogicounter}.
+#' @export
+#' @examples
+#' cn <- new.counter()
+#' cn$inc("foo")
+#' cn$inc("bar")
+#' cn$add("foo",6)
+#' cn$get("foo")
+#' # 7
+#' cn$ls()
+#' # foo 7
+#' # bar 1
+#' cn$export()
+#' # foo=7,bar=1
+new.counter <- function() {
+
+	a <- list()
+
+	###
+	# Add x occurrences to item id
+	#
+	add <- function(id,x) {
+		if (!is.character(id)) {
+			stop("Illegal argument:",id)
+		}
+		if (is.null(a[[id]])) {
+			a[[id]] <<- x
+		} else {
+			a[[id]] <<- a[[id]] + x
+		}
+	}
+
+	# increase counter for item id by 1
+	inc <- function(id) add(id,1)
+
+	# get the counter state for id
+	get <- function(id) a[[id]]
+
+	# list counts for all ids
+	ls <- function() a
+
+	# export counter state as a string
+	export <- function() {
+		paste(lapply(names(a), function(id) paste(id,"=",a[[id]],sep="") ), collapse=",")
+	}
+
+	# import counter state from string
+	import.add <- function(strs) { 
+		lapply(strsplit(strs,","), function(eqs) {
+			lapply(strsplit(eqs,"="), function(vals) {
+				add(vals[[1]],as.numeric(vals[[2]]))
+			})
+		})
+		invisible()
+	}
+
+	structure(
+		list(
+			inc = inc,
+			add = add,
+			get = get,
+			ls = ls,
+			export = export,
+			import.add = import.add
+		),
+		class="yogicounter"
+	)
+}
+
+#' 3D-bind matrices
+#' 
+#' Binds matrices of same size together to a 3D array, analogously
+#' to cbind and rbind.
+#' 
+#' @param ... Any number of matrices of the same size
+#' @return A 3D array of the bound matrices
+#' @export
+zbind <- function(...) {
+	x <- list(...)
+	y <- array(0,dim=c(nrow(x[[1]]),ncol(x[[1]]),length(x)),dimnames=dimnames(x[[1]]))
+	for (i in 1:length(x)) y[,,i] <- x[[i]]
+	y
+}
+
+#' Extract regex groups (local)
+#' 
+#' Locally excise regular expression groups from string vectors.
+#' I.e. only extract the first occurrence of each group within each string.
+#' 
+#' @param x A vector of strings from which to extract the groups.
+#' @param re The regular expression defining the groups
+#' @return A \code{matrix} containing the group contents, 
+#'      with one row for each element of x and one column for each group.
+#' @keywords regular expression groups
+#' @export
+extract.groups <- function(x, re) {
+	matches <- regexpr(re,x,perl=TRUE)
+	start <- attr(matches,"capture.start")
+	end <- start + attr(matches,"capture.length") - 1
+	do.call(cbind,lapply(1:ncol(start), function(i) {
+		sapply(1:nrow(start),function(j){
+			if (start[j,i] > -1) substr(x[[j]],start[j,i],end[j,i]) else NA
+		})
+	}))
+}
+
+#' Extract regex groups (global)
+#' 
+#' Globally excise regular expression groups from string vectors.
+#' I.e. only extract the all occurrences of each group within each string.
+#' 
+#' @param x A vector of strings from which to extract the groups.
+#' @param re The regular expression defining the groups
+#' @return A \code{list} of \code{matrix}'s containing the group contents, 
+#'      with one list item for every element of x, and with each matrix 
+#'      containing one column for each group and one row for each occurrence
+#'      of the pattern.
+#' @keywords regular expression groups
+#' @export
+global.extract.groups <- function(x,re) {
+    all.matches <- gregexpr(re,x,perl=TRUE)
+    mapply(function(matches,x) {
+        start <- attr(matches,"capture.start")
+        end <- start + attr(matches,"capture.length") - 1
+        apply(zbind(start,end),c(1,2),function(pos) substr(x,pos[[1]],pos[[2]]) )
+    },matches=all.matches,x=x,SIMPLIFY=FALSE)
+}
+
+
+
+
+#' Get i'th rank from list
+#' 
+#' Retieve the i'th ranked item from a numerical vector
+#' 
+#' @param values a numerical vector
+#' @param i the rank
+#' @param high whether to rank by highest or lowest values.
+#' @return the ith ranked value
+#' @export
+#' @examples
+#' vals <- rnorm(100,0,1)
+#' ith.rank(vals,4)
+ith.rank <- function(values, i, high=TRUE) sort(values,decreasing=high)[[i]]
+
+
+#' Matthew's correlation coefficient (MCC)
+#' 
+#' Calculate Matthew's correlation coeffient (MCC). 
+#' See \url{https://en.wikipedia.org/wiki/Matthews_correlation_coefficient}
+#' 
+#' @param t the score threshold
+#' @param scores vector of scores for each measured item
+#' @param truth \code{logical} vector classifying each item as a 
+#'    member of the hidden true or false classes
+#' @return a vector listing the MCC value, the precision, and the recall
+#' @export
+#' @examples
+#' patientHasDisease <- sample(c(TRUE,FALSE),100,replace=TRUE)
+#' patientDiganosticScore <- sapply(patientHasDisease,
+#'    function(d) if (d) rnorm(1,20,3) else rnorm(1,18,3)
+#' )
+#' mccval <- mcc(21,patientDiganosticScore,patientHasDisease)
+mcc <- function(t, scores, truth) {
+
+	# exclude <- is.na(scores) | is.na(truth)
+	# scores <- scores[-exclude]
+	# truth <- truth[-exclude]
+
+	.truth <- truth == 1
+	.calls <- scores >= t
+
+	tp <- sum(.truth & .calls)
+	tn <- sum(!.truth & !.calls)
+	fp <- sum(.calls & !.truth)
+	fn <- sum(.truth & !.calls)
+
+	# mcc <- (tp * tn - fp * fn)/sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn))
+	#this formula prevents integer overflow errors
+	mcc <- exp( log(tp*tn - fp*fn) - ( log(tp+fp) + log(tp+fn) + log(tn+fp) + log(tn+fn) )/2 )
+	prec <- tp/(tp+fp)
+	recall <- tp/(tp+fn)
+	c(mcc=mcc,prec=prec,recall=recall)
+}
+
+
+#' Convert row-bound lists to data.frame
+#' 
+#' Running \code{rbind} on lists with the same element names
+#' yields a datastructure very similar to a \code{data.frame}, but does not
+#' provide the same full functionality. This function converts such 
+#' objects to a real dataframe.
+#' @param x the result of the rbind call.
+#' @return a \code{data.frame}
+#' @export
+#' @examples
+#' x <- rbind(list(a=1,b="foo"),list(a=2,b="bar"))
+#' y <- to.df(x)
+to.df <- function(x) {
+	if (is.null(x)) return(NULL)
+	y <- lapply(1:ncol(x), function(col) {
+		unlist(x[,col])
+	})
+	names(y) <- colnames(x)
+	as.data.frame(y,stringsAsFactors=FALSE)
+}
+
+#' Convert list of lists into data.frame
+#' 
+#' The list of lists should only contain lists with the same element names.
+#' @param x the list of lists
+#' @return a \code{data.frame}
+#' @export
+#' @examples
+#' x <- as.df(list(list(a=1,b="foo"),list(a=2,b="bar")))
+as.df <- function(x) {
+	df <- as.data.frame(lapply(1:length(x[[1]]),function(i) sapply(x,`[[`,i) ), stringsAsFactors=FALSE)
+	colnames(df) <- names(x[[1]])
+	df
+}
+
+#' Remove infinite and NA values 
+#' 
+#' Removes infinite and NA values from vectors, lists, matrices and data.frames.
+#' 
+#' Warning: If the given object is matrix or data.frame, any row containing infinite or NA
+#' values is removed entirely. All columns must be numeric.
+#' @param x the object to which the function is applied
+#' @return the same object, with NAs and infinite values removed
+#' @export
+#' @examples
+#' fin(c(1,2,NA,3))
+#' fin(data.frame(a=c(1,2,NA,3),b=c(4,5,6,7)))
+fin <- function(x) {
+	if (inherits(x,"data.frame") || inherits(x,"matrix")) {
+		x[apply(x,1,function(.x) all(!is.na(.x) & is.finite(.x))),]
+	} else {
+		x[!is.na(x) & is.finite(x)]
+	}
+}
+
+
+#' Convert from Quadrant to Coordinate adress
+#' 
+#' Converts address tags for 384-well plates from the quadrant system (e.g. C_A08)
+#' to the raw coordinate system (e.g. B15). 
+#' @param x a quadrant coordinate (e.g. C_A08) (do not directly use on vectors!)
+#' @return the raw plate coordinate
+#' @export
+#' @examples
+#' q2c("C_A08")
+q2c <- function(x) {
+	q <- which(LETTERS==substr(x,1,1))
+	r <- which(LETTERS==substr(x,3,3))
+	c <- as.numeric(substr(x,4,nchar(x)))
+	.r <- r*2 - (q<3)
+	.c <- c*2 - q%%2
+	paste(LETTERS[[.r]],sprintf("%02d",.c),sep="")
+}
+
+#' Convert from Raw coordinate to Quadrant address
+#' 
+#' Converts address tags for 384-well plates from the 
+#' raw coordinate system (e.g. B15) to the quadrant system (e.g. C_A08). 
+#' @param x a raw coordinate (e.g. B15) (do not directly use on vectors!)
+#' @return the quadrant plate coordinate
+#' @export
+#' @examples
+#' c2q("B15")
+c2q <- function(x) {
+	r <- which(LETTERS==substr(x,1,1))
+	c <- as.numeric(substr(x,2,nchar(x)))
+	.r <- ceiling(r/2)
+	.c <- ceiling(c/2)
+	.q <- ((r-1)%%2)*2 + (c-1)%%2+1
+	paste(LETTERS[[.q]],"_",LETTERS[[.r]],sprintf("%02d",.c),sep="")
+}
+
+
+#' Set of subsets
+#' 
+#' Generates the set of all possible subsets for a given list or vector
+#' @param l a list or vector
+#' @return a list of lists containing all possible subsets of the input
+#' @export
+#' @examples
+#' combo(1:4)
+combo <- function(l) {
+	do.call(c,lapply(1:length(l),function(n){
+		tab <- combn(l,n)
+		lapply(1:ncol(tab),function(i)tab[,i])
+	}))
+}
+
+#' Add alpha channel
+#' 
+#' Adds an alpha channel (i.e. transparency) to a predefined color
+#' @param color a predefined color string (e.g. "firebrick")
+#' @param alpha a number between 0 and 1 for the alpha channel value
+#' @export
+#' @examples
+#' transparentChartreuse <- colAlpha("chartreuse3",0.3)
+colAlpha <- function(color, alpha) {
+    do.call(rgb,as.list(c(col2rgb(color)[,1],alpha=alpha*255,maxColorValue=255)))
+}
+
+
+
+#' Cluster mapper
+#' 
+#' Constructor for an object supporting simple connected-component-clustering
+#' 
+#' The process starts with n objects, each in their own cluster. Whenever a link
+#' is between two objects is reported, their clusters are merged.
+#' Contains the following functions:
+#' \begin{itemize}
+#'   \item \code{addLink(i,j)}: Creates a new link between items i and j. Whenever a link
+#'      is created, the clusters encompassing the two objects are merged.
+#'   \item \code{getClusters()}: Returns a list of lists representing the clusters
+#'   \item \code{getIdxOf(i)}: Returns the cluster index of a given object.
+#' \end{itemize}
+#' @param n The number of elements to cluster.
+#' @return the mapper object
+#' @export
+#' @examples
+#' cmap <- new.cluster.map(10)
+#' cmap$addLink(1,5)
+#' cmap$addLink(3,5)
+#' cmap$addLink(1,5)
+#' cmap$getClusters()
+new.cluster.map <- function(n) {
+	
+	.clusters <- as.list(1:n)
+
+	.getIdx <- function(i) which(sapply(.clusters,function(x) i %in% x))
+
+	addLink <- function(i,j) {
+		i.idx <- .getIdx(i)
+		j.idx <- .getIdx(j)
+		joint <- union(.clusters[[i.idx]],.clusters[[j.idx]])
+		.clusters[c(i.idx,j.idx)] <<- NULL
+		.clusters[[length(.clusters)+1]] <<- joint
+	}
+
+	getClusters <- function() .clusters
+
+	list(addLink=addLink, getClusters=getClusters, getIdxOf=.getIdx)
+}
+
+# #' Retrieve Protein sequence from UniProt
+# #' 
+# #' Retrieves the amino acid sequence for a given protein identified by
+# #' a Uniprot Accession.
+# #' @param The uniprot accession
+# #' @return the protein sequence
+# #' @export
+# getUniprotSeq <- function(uniprot.acc) {
+
+# 	url <- paste0("https://www.uniprot.org/uniprot/",uniprot.acc,".fasta")
+
+# 	readFASTA <- function(file) {
+# 		lines <- scan(file,what="character",sep="\n")
+# 		if (length(lines) < 2) {
+# 			stop("Invalid FASTA format in ",file)
+# 		}
+# 		if (substr(lines[[1]],1,1) != ">") {
+# 			stop("Missing FASTA header in ",file)
+# 		}
+# 		paste(lines[-1],collapse="")
+# 	}
+
+# 	prot <- readFASTA(url)
+
+# 	sapply(1:nchar(prot),function(i)substr(prot,i,i))
+
+# }
+
+# provean.input <- function(uniprot.acc,wt.aa) {
+# 	aas <- c("A","V","L","I","M","F","Y","W","R","H","K","D","E","S","T","N","Q","G","C","P")
+# 	featable <- expand.grid(pos=1:length(wt.aa),mut.aa=aas)
+# 	provean.in <- data.frame(protein=uniprot.acc,pos=featable$pos,
+# 		wt=wt.aa[featable$pos],mut=featable$mut.aa
+# 	)
+# 	write.table(provean.in,paste0(uniprot.acc,"_provean_input.txt"),
+# 		sep="\t",row.names=FALSE,col.names=FALSE,quote=FALSE
+# 	)
+# }
