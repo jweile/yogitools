@@ -356,17 +356,102 @@ combo <- function(l) {
 	}))
 }
 
+
+#' Deconstruct a string into single characters
+#' 
+#' Converts a single character string into a a vector of individual characters
+#' @param str the input string
+#' @return a vector of characters
+#' @export
+#' @examples
+#' nucleotides <- toChars("ACTTGCTAAACTTGA")
+toChars <- function(str) {
+	if (!is.character(str) || length(str) != 1) {
+		stop("input must be a single character string")
+	}
+	sapply(1:nchar(str), function(i) substr(str,i,i))
+}
+
+#' Checks if a string is a valid color
+#' 
+#' Given a character vector, this function will check whether each element in the vector
+#' is a valid color descriptor, such as "black", "chartreuse2", or "#ff0000"
+#' @param str a character vector
+#' @return a logical vector of the same length indicating which elements are valid colors
+#' @references \url{http://stackoverflow.com/questions/13289009/check-if-character-string-is-a-valid-color-representation/13290832#13290832}
+#' @export
+#' @examples
+#' is.color(c(NA, "black", "blackk", "1", "#00", "#000000"))
+is.color <- function(str) {
+	sapply(str, function(x) {
+		tryCatch(
+			is.matrix(col2rgb(x)), 
+			error = function(e) FALSE
+		)
+	})
+}
+
 #' Add alpha channel
 #' 
 #' Adds an alpha channel (i.e. transparency) to a predefined color
 #' @param color a predefined color string (e.g. "firebrick")
 #' @param alpha a number between 0 and 1 for the alpha channel value
+#' @return the corresponding color with the added alpha channel value
 #' @export
 #' @examples
 #' transparentChartreuse <- colAlpha("chartreuse3",0.3)
 colAlpha <- function(color, alpha) {
-    do.call(rgb,as.list(c(col2rgb(color)[,1],alpha=alpha*255,maxColorValue=255)))
+	if (length(color) != 1) {
+		stop("argument 'color' can only be a single value!")
+	}
+	if (length(alpha) != 1 || !is.numeric(alpha) || alpha < 0 || alpha > 1) {
+		stop("alpha must be a single numerical value between 0 and 1")
+	}
+	if (!is.color(color)) {
+		stop("argument 'color' must be a valid color!")
+	}
+	do.call(rgb,as.list(c(col2rgb(color)[,1],alpha=alpha*255,maxColorValue=255)))
 }
+
+
+#' Create a color gradient function
+#' 
+#' Creates a color gradient function that maps numerical values to colors on a gradient.
+#' Multiple stops in the gradient can be defined as different input colors and be assigned
+#' to numerical values. For example, a gradient could start at '0' with the color blue, transition
+#' towards white as it approaches '1' and further transition to red as it approaches '2'. Values
+#' outside of the defined range would be mapped to the nearest extreme color; e.g. in the previous
+#' example, '3.1' would still map to red.
+#' 
+#' @param valStops a vector listing the numerical values mapped to the color stops. Defaults to
+#'   \code{c(0,1,2)}. 
+#' @param colStops a vector of color strings. Defaults to \code{c("royalblue3","white","firebrick3")}.
+#' @return a function accepting a numerical vector as input, which will produce the 
+#'   corresponding color vector.
+#' @export
+#' @examples
+#' mycolmap <- colmap(c(0,1,2),c("royalblue3","white","firebrick3"))
+#' mycolors <- mycolmap(seq(0,2,0.01))
+colmap <- function(valStops = c(0,1,2), colStops = c("royalblue3","white","firebrick3")) {
+	if (!all(is.color(colStops))){
+		stop("colStops must contain valid colors")
+	}
+	spacing <- 1/(length(valStops)-1)
+	function(vals) {
+		ramp <- colorRamp(colStops)
+		trvals <- sapply(vals,function(x) {
+			if (x < valStops[[1]]) 0
+			else if (x > valStops[[length(valStops)]]) 1
+			else {
+				stopIdx <- if (!any(valStops > x)) 1 else which(valStops > x)[[1]]-1
+				offset <- (x-valStops[[stopIdx]])/(valStops[[stopIdx+1]]-valStops[[stopIdx]])
+				spacing*(stopIdx-1) + offset*spacing
+			}
+		})
+		apply(ramp(trvals),1,function(x)do.call(rgb,as.list(x/255)))
+	}
+}
+
 
 
 

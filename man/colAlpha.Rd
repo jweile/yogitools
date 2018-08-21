@@ -11,6 +11,9 @@ colAlpha(color, alpha)
 
 \item{alpha}{a number between 0 and 1 for the alpha channel value}
 }
+\value{
+the corresponding color with the added alpha channel value
+}
 \description{
 Adds an alpha channel (i.e. transparency) to a predefined color
 }
