@@ -426,29 +426,34 @@ colAlpha <- function(color, alpha) {
 #' @param valStops a vector listing the numerical values mapped to the color stops. Defaults to
 #'   \code{c(0,1,2)}. 
 #' @param colStops a vector of color strings. Defaults to \code{c("royalblue3","white","firebrick3")}.
+#' @param naCol the color to assign to NA values. Defaults to "gray"
 #' @return a function accepting a numerical vector as input, which will produce the 
 #'   corresponding color vector.
 #' @export
 #' @examples
-#' mycolmap <- colmap(c(0,1,2),c("royalblue3","white","firebrick3"))
+#' mycolmap <- colmap(c(0,1,2),c("royalblue3","white","firebrick3"),naCol="gray")
 #' mycolors <- mycolmap(seq(0,2,0.01))
-colmap <- function(valStops = c(0,1,2), colStops = c("royalblue3","white","firebrick3")) {
+colmap <- function(valStops = c(0,1,2), colStops = c("royalblue3","white","firebrick3"), naCol="gray") {
 	if (!all(is.color(colStops))){
 		stop("colStops must contain valid colors")
+	}
+	if (!is.color(naCol)) {
+		stop("naCol must be a valid color")
 	}
 	spacing <- 1/(length(valStops)-1)
 	function(vals) {
 		ramp <- colorRamp(colStops)
 		trvals <- sapply(vals,function(x) {
-			if (x < valStops[[1]]) 0
-			else if (x > valStops[[length(valStops)]]) 1
+			if (is.na(x)) NA
+			else if (x <= valStops[[1]]) 0
+			else if (x >= valStops[[length(valStops)]]) 1
 			else {
 				stopIdx <- if (!any(valStops > x)) 1 else which(valStops > x)[[1]]-1
 				offset <- (x-valStops[[stopIdx]])/(valStops[[stopIdx+1]]-valStops[[stopIdx]])
 				spacing*(stopIdx-1) + offset*spacing
 			}
 		})
-		apply(ramp(trvals),1,function(x)do.call(rgb,as.list(x/255)))
+		apply(ramp(trvals),1,function(x) if (any(is.na(x))) naCol else do.call(rgb,as.list(x/255)))
 	}
 }
 

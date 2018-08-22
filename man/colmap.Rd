@@ -5,13 +5,15 @@
 \title{Create a color gradient function}
 \usage{
 colmap(valStops = c(0, 1, 2), colStops = c("royalblue3", "white",
-  "firebrick3"))
+  "firebrick3"), naCol = "gray")
 }
 \arguments{
 \item{valStops}{a vector listing the numerical values mapped to the color stops. Defaults to
 \code{c(0,1,2)}.}
 
 \item{colStops}{a vector of color strings. Defaults to \code{c("royalblue3","white","firebrick3")}.}
+
+\item{naCol}{the color to assign to NA values. Defaults to "gray"}
 }
 \value{
 a function accepting a numerical vector as input, which will produce the 
@@ -26,6 +28,6 @@ outside of the defined range would be mapped to the nearest extreme color; e.g. 
 example, '3.1' would still map to red.
 }
 \examples{
-mycolmap <- colmap(c(0,1,2),c("royalblue3","white","firebrick3"))
+mycolmap <- colmap(c(0,1,2),c("royalblue3","white","firebrick3"),naCol="gray")
 mycolors <- mycolmap(seq(0,2,0.01))
 }
