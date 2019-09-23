@@ -52,7 +52,7 @@ getArg <- function(name, default=NULL, required=FALSE) {
 #' of the counter status in string form.
 #' 
 #' The object has the following methods:
-#' \begin{itemize}
+#' \itemize{
 #'  \item \code{inc(id)}: Increase the counter for item with \code{id} by 1.
 #'  \item \code{add(id,x)}: Add \code{x} occurrences for the item with \code{id}.
 #'  \item \code{get(id)}: Get the number of occurrences seen for item \code{id}.
@@ -60,7 +60,7 @@ getArg <- function(name, default=NULL, required=FALSE) {
 #'  \item \code{export(id)}: Exports the counter state to a string that can be saved or logged.
 #'  \item \code{import.add(str)} Imports a previous counter state from the string \code{str} 
 #'      and adds it to the current counts.
-#' \end{itemize}
+#' }
 #' 
 #' @return An object of type \code{yogicounter}.
 #' @export
@@ -467,12 +467,12 @@ colmap <- function(valStops = c(0,1,2), colStops = c("royalblue3","white","fireb
 #' The process starts with n objects, each in their own cluster. Whenever a link
 #' is between two objects is reported, their clusters are merged.
 #' Contains the following functions:
-#' \begin{itemize}
+#' \itemize{
 #'   \item \code{addLink(i,j)}: Creates a new link between items i and j. Whenever a link
 #'      is created, the clusters encompassing the two objects are merged.
 #'   \item \code{getClusters()}: Returns a list of lists representing the clusters
 #'   \item \code{getIdxOf(i)}: Returns the cluster index of a given object.
-#' \end{itemize}
+#' }
 #' @param n The number of elements to cluster.
 #' @return the mapper object
 #' @export

@@ -16,7 +16,7 @@ of the counter status in string form.
 }
 \details{
 The object has the following methods:
-\begin{itemize}
+\itemize{
  \item \code{inc(id)}: Increase the counter for item with \code{id} by 1.
  \item \code{add(id,x)}: Add \code{x} occurrences for the item with \code{id}.
  \item \code{get(id)}: Get the number of occurrences seen for item \code{id}.
@@ -24,7 +24,7 @@ The object has the following methods:
  \item \code{export(id)}: Exports the counter state to a string that can be saved or logged.
  \item \code{import.add(str)} Imports a previous counter state from the string \code{str} 
      and adds it to the current counts.
-\end{itemize}
+}
 }
 \examples{
 cn <- new.counter()

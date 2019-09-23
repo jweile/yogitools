@@ -19,12 +19,12 @@ Constructor for an object supporting simple connected-component-clustering
 The process starts with n objects, each in their own cluster. Whenever a link
 is between two objects is reported, their clusters are merged.
 Contains the following functions:
-\begin{itemize}
+\itemize{
   \item \code{addLink(i,j)}: Creates a new link between items i and j. Whenever a link
      is created, the clusters encompassing the two objects are merged.
   \item \code{getClusters()}: Returns a list of lists representing the clusters
   \item \code{getIdxOf(i)}: Returns the cluster index of a given object.
-\end{itemize}
+}
 }
 \examples{
 cmap <- new.cluster.map(10)
