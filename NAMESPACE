@@ -2,6 +2,7 @@
 
 export(as.df)
 export(c2q)
+export(canRead)
 export(colAlpha)
 export(colmap)
 export(combo)

@@ -1,3 +1,16 @@
+
+#' Can read file
+#'
+#' Determines whether the given file exists and is readable
+#' @param filename the name of the file
+#' @return boolean
+#' @export
+#' @examples
+#' \dontrun{
+#' canRead("foobar.txt")
+#' }
+canRead <- function(filename) file.access(filename,mode=4) == 0
+
 #' Get CLI argument
 #' 
 #' Retrieves a user-supplied argument command-line argument
