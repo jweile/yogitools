@@ -11,6 +11,7 @@
 #' }
 canRead <- function(filename) file.access(filename,mode=4) == 0
 
+
 #' Get CLI argument
 #' 
 #' Retrieves a user-supplied argument command-line argument
@@ -612,6 +613,37 @@ topoScatter <- function(x,y,resolution=20,thresh=5,
 	}
 
 }
+
+
+
+#' Generic function for running means/medians etc across 2D data
+#'
+#' @param x the axis over which bins will be formed
+#' @param y the dimension on which the function 'fun' is applied
+#' @param width the width of the bins
+#' @param granularity The number of bins to use
+#' @param fun the function that will be applied to the y values in each bin
+#' @param logScale whether or not bin-size will be at log scale across x
+#' @return a matrix with two columns: bin centroid, and value of fun
+#' @export
+runningFunction <- function(x,y,width,granularity,fun=mean,logScale=FALSE) {
+	if (logScale) {
+		x <- log10(x)
+		width <- log10(width)
+	}
+	rng <- range(x,na.rm=TRUE,finite=TRUE)
+	binSides <- seq(rng[[1]],rng[[2]],length.out=granularity)
+	binMids <- binSides[-1]-(rng[[2]]-rng[[1]])/(2*granularity)
+	out <- sapply(binMids, function(m) {
+		bin <- y[which(abs(x-m) < width)]
+		fun(bin)
+	})
+	if (logScale) {
+		binMids <- 10^binMids
+	}
+	cbind(binMids,out)
+}
+
 
 
 # #' Retrieve Protein sequence from UniProt

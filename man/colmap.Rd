@@ -4,8 +4,11 @@
 \alias{colmap}
 \title{Create a color gradient function}
 \usage{
-colmap(valStops = c(0, 1, 2), colStops = c("royalblue3", "white",
-  "firebrick3"), naCol = "gray")
+colmap(
+  valStops = c(0, 1, 2),
+  colStops = c("royalblue3", "white", "firebrick3"),
+  naCol = "gray"
+)
 }
 \arguments{
 \item{valStops}{a vector listing the numerical values mapped to the color stops. Defaults to

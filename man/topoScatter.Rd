@@ -4,10 +4,18 @@
 \alias{topoScatter}
 \title{Topographical scatterplot}
 \usage{
-topoScatter(x, y, resolution = 20, thresh = 5,
+topoScatter(
+  x,
+  y,
+  resolution = 20,
+  thresh = 5,
   topoCol = colorRampPalette(c("black", "red", "yellow"))(20),
-  maxFreq = NULL, xlim = range(x, na.rm = TRUE), ylim = range(y,
-  na.rm = TRUE), log = "", ...)
+  maxFreq = NULL,
+  xlim = range(x, na.rm = TRUE),
+  ylim = range(y, na.rm = TRUE),
+  log = "",
+  ...
+)
 }
 \arguments{
 \item{x}{a vector of x-coordinates}
