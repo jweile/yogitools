@@ -621,21 +621,33 @@ topoScatter <- function(x,y,resolution=20,thresh=5,
 #' @param x the axis over which bins will be formed
 #' @param y the dimension on which the function 'fun' is applied
 #' @param width the width of the bins
-#' @param granularity The number of bins to use
+#' @param nbins The number of bins to use
 #' @param fun the function that will be applied to the y values in each bin
 #' @param logScale whether or not bin-size will be at log scale across x
 #' @return a matrix with two columns: bin centroid, and value of fun
 #' @export
-runningFunction <- function(x,y,width,granularity,fun=mean,logScale=FALSE) {
+runningFunction <- function(x,y,nbins,fun=mean,logScale=FALSE) {
+	if (length(x) != length(y)) {
+		stop("x and y must be of equal length!")
+	}
+	if (!is.numeric(x) || !is.numeric(y)) {
+		stop("x and y must be numeric!")
+	}
 	if (logScale) {
+		if (any(x <= 0)) {
+			warning("Ignoring infinite values and values <= 0 on x-axis!")
+			bad <- x <= 0 | is.infinite(x)
+			x <- x[!bad]
+			y <- y[!bad]
+		}
 		x <- log10(x)
-		width <- log10(width)
+		# width <- log10(width)
 	}
 	rng <- range(x,na.rm=TRUE,finite=TRUE)
-	binSides <- seq(rng[[1]],rng[[2]],length.out=granularity)
-	binMids <- binSides[-1]-(rng[[2]]-rng[[1]])/(2*granularity)
-	out <- sapply(binMids, function(m) {
-		bin <- y[which(abs(x-m) < width)]
+	binSides <- seq(rng[[1]],rng[[2]],length.out=nbins)
+	binMids <- binSides[-1]-(rng[[2]]-rng[[1]])/(2*nbins)
+	out <- sapply(1:length(binMids), function(i) {
+		bin <- y[which(x > binSides[[i]] & x <= binSides[[i+1]])]
 		fun(bin)
 	})
 	if (logScale) {
