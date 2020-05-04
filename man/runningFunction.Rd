@@ -4,20 +4,20 @@
 \alias{runningFunction}
 \title{Generic function for running means/medians etc across 2D data}
 \usage{
-runningFunction(x, y, width, granularity, fun = mean, logScale = FALSE)
+runningFunction(x, y, nbins, fun = mean, logScale = FALSE)
 }
 \arguments{
 \item{x}{the axis over which bins will be formed}
 
 \item{y}{the dimension on which the function 'fun' is applied}
 
-\item{width}{the width of the bins}
-
-\item{granularity}{The number of bins to use}
+\item{nbins}{The number of bins to use}
 
 \item{fun}{the function that will be applied to the y values in each bin}
 
 \item{logScale}{whether or not bin-size will be at log scale across x}
+
+\item{width}{the width of the bins}
 }
 \value{
 a matrix with two columns: bin centroid, and value of fun

@@ -657,6 +657,55 @@ runningFunction <- function(x,y,nbins,fun=mean,logScale=FALSE) {
 }
 
 
+#' Helper function for drawing p-values over barplots
+#'
+#' @param p p-value
+#' @param i x-coordinate of the left bar 
+#' @param j x-coordinate of the right bar 
+#' @param h height (y-coordinate) at which to draw the bracket
+#' @param s spacer size (distance between brackets; size of feet)
+#' @return nothing
+#' @export
+drawPvalBracket <- function(p,i,j,h=1.1,s=0.02) {
+	#choose the correct notation and build an expression object accordingly
+	pExpr <- if (p < 0.001) {
+		#if p=0, then the p-value is smaller than the numerical
+		#  precision of the test, so we can only indicate that it's smaller than 2.2e-16
+		if (p == 0) {
+			#build math expression
+			expression(p < 2.2%*%10^-16)
+		} else {
+			#use scientific notation for values < 0.001
+			#first, extract the exponent
+			expo <- floor(log10(p))
+			#then extract the mantissa
+			sfd <- signif(p*10^-expo,digits=3)
+			#use bquote to interpolate mantissa and exponent into math expression
+			bquote(p == .(sfd)%*%10^.(expo))
+		}
+	} else {
+		#use regular decimal noation for values > 0.001
+		sprintf("p = %.03f",p)
+	}
+	#draw the bracket
+	lines(c(i+s,i+s,j-s,j-s),c(h-s,h,h,h-s))
+	#draw the p-value expression
+	text(mean(c(i,j)),h,pExpr,pos=3,cex=0.7)
+	#return nothing
+	return(invisible(NULL))
+}
+
+#' Helper function for drawing error bars on barplots
+#' 
+#' @param xs vector of x coordinates of bars
+#' @param val the values (heights) of the bars
+#' @param err the size amount of error associated with each bar
+#' @param l the length of the terminators of the bar
+#' @param ... any other graphical parameters
+#' @export
+errorBars <- function(xs,val,err,l=0.01,...) {
+	arrows(xs,val-err/2,xs,val+err/2,length=l,angle=90,code=3,...)
+}
 
 # #' Retrieve Protein sequence from UniProt
 # #' 
