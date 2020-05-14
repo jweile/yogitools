@@ -4,7 +4,7 @@
 \alias{drawPvalBracket}
 \title{Helper function for drawing p-values over barplots}
 \usage{
-drawPvalBracket(p, i, j, h = 1.1, s = 0.02)
+drawPvalBracket(p, i, j, h = 1.1, s = 0.02, th = 0.02)
 }
 \arguments{
 \item{p}{p-value}
@@ -16,6 +16,8 @@ drawPvalBracket(p, i, j, h = 1.1, s = 0.02)
 \item{h}{height (y-coordinate) at which to draw the bracket}
 
 \item{s}{spacer size (distance between brackets; size of feet)}
+
+\item{th}{tick height (how tall the tick marks will be drawn)}
 }
 \value{
 nothing

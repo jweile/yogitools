@@ -664,14 +664,15 @@ runningFunction <- function(x,y,nbins,fun=mean,logScale=FALSE) {
 #' @param j x-coordinate of the right bar 
 #' @param h height (y-coordinate) at which to draw the bracket
 #' @param s spacer size (distance between brackets; size of feet)
+#' @param th tick height (how tall the tick marks will be drawn)
 #' @return nothing
 #' @export
-drawPvalBracket <- function(p,i,j,h=1.1,s=0.02) {
+drawPvalBracket <- function(p,i,j,h=1.1,s=0.02,th=0.02) {
 	#choose the correct notation and build an expression object accordingly
 	pExpr <- if (p < 0.001) {
 		#if p=0, then the p-value is smaller than the numerical
 		#  precision of the test, so we can only indicate that it's smaller than 2.2e-16
-		if (p == 0) {
+		if (p < 2.2e-16) {
 			#build math expression
 			expression(p < 2.2%*%10^-16)
 		} else {
@@ -688,7 +689,7 @@ drawPvalBracket <- function(p,i,j,h=1.1,s=0.02) {
 		sprintf("p = %.03f",p)
 	}
 	#draw the bracket
-	lines(c(i+s,i+s,j-s,j-s),c(h-s,h,h,h-s))
+	lines(c(i+s,i+s,j-s,j-s),c(h-th,h,h,h-th))
 	#draw the p-value expression
 	text(mean(c(i,j)),h,pExpr,pos=3,cex=0.7)
 	#return nothing
