@@ -704,13 +704,16 @@ drawPvalBracket <- function(p,i,j,h=1.1,s=0.02,th=0.02) {
 #' @param err the size amount of error associated with each bar
 #' @param l the length of the terminators of the bar
 #' @param vertical whether the bars are vertical or horizontal
+#' @param topToBottom whether the error is represented as the distance
+#'   between the top and bottom of the bar, or the middle and the top.
 #' @param ... any other graphical parameters
 #' @export
-errorBars <- function(xs,val,err,l=0.01,vertical=TRUE,...) {
+errorBars <- function(xs,val,err,l=0.01,vertical=TRUE,topToBottom=TRUE...) {
+	factor <- ifelse(topToBottom,2,1)
 	if (vertical) {
-		arrows(xs,val-err/2,xs,val+err/2,length=l,angle=90,code=3,...)
+		arrows(xs,val-err/factor,xs,val+err/factor,length=l,angle=90,code=3,...)
 	} else {
-		arrows(val-err/2,xs,val+err/2,xs,length=l,angle=90,code=3,...)
+		arrows(val-err/factor,xs,val+err/factor,xs,length=l,angle=90,code=3,...)
 	}
 }
 
