@@ -2,21 +2,24 @@
 % Please edit documentation in R/yogitools.R
 \name{errorBars}
 \alias{errorBars}
-\title{Helper function for drawing error bars on barplots}
+\title{Helper function for drawing error bars}
 \usage{
-errorBars(xs, val, err, l = 0.01, ...)
+errorBars(xs, val, err, l = 0.01, vertical = TRUE, ...)
 }
 \arguments{
-\item{xs}{vector of x coordinates of bars}
+\item{xs}{vector of x coordinates of data points (In case of vertical=FALSE, 
+these are interpreted as y-coordinates)}
 
-\item{val}{the values (heights) of the bars}
+\item{val}{the values (heights) of the data points.}
 
 \item{err}{the size amount of error associated with each bar}
 
 \item{l}{the length of the terminators of the bar}
 
+\item{vertical}{whether the bars are vertical or horizontal}
+
 \item{...}{any other graphical parameters}
 }
 \description{
-Helper function for drawing error bars on barplots
+Helper function for drawing error bars
 }

@@ -696,16 +696,22 @@ drawPvalBracket <- function(p,i,j,h=1.1,s=0.02,th=0.02) {
 	return(invisible(NULL))
 }
 
-#' Helper function for drawing error bars on barplots
+#' Helper function for drawing error bars
 #' 
-#' @param xs vector of x coordinates of bars
-#' @param val the values (heights) of the bars
+#' @param xs vector of x coordinates of data points (In case of vertical=FALSE, 
+#'   these are interpreted as y-coordinates)
+#' @param val the values (heights) of the data points.
 #' @param err the size amount of error associated with each bar
 #' @param l the length of the terminators of the bar
+#' @param vertical whether the bars are vertical or horizontal
 #' @param ... any other graphical parameters
 #' @export
-errorBars <- function(xs,val,err,l=0.01,...) {
-	arrows(xs,val-err/2,xs,val+err/2,length=l,angle=90,code=3,...)
+errorBars <- function(xs,val,err,l=0.01,vertical=TRUE,...) {
+	if (vertical) {
+		arrows(xs,val-err/2,xs,val+err/2,length=l,angle=90,code=3,...)
+	} else {
+		arrows(val-err/2,xs,val+err/2,xs,length=l,angle=90,code=3,...)
+	}
 }
 
 # #' Retrieve Protein sequence from UniProt
