@@ -708,7 +708,7 @@ drawPvalBracket <- function(p,i,j,h=1.1,s=0.02,th=0.02) {
 #'   between the top and bottom of the bar, or the middle and the top.
 #' @param ... any other graphical parameters
 #' @export
-errorBars <- function(xs,val,err,l=0.01,vertical=TRUE,topToBottom=TRUE...) {
+errorBars <- function(xs,val,err,l=0.01,vertical=TRUE,topToBottom=TRUE,...) {
 	factor <- ifelse(topToBottom,2,1)
 	if (vertical) {
 		arrows(xs,val-err/factor,xs,val+err/factor,length=l,angle=90,code=3,...)
