@@ -4,7 +4,7 @@
 \alias{errorBars}
 \title{Helper function for drawing error bars}
 \usage{
-errorBars(xs, val, err, l = 0.01, vertical = TRUE, ...)
+errorBars(xs, val, err, l = 0.01, vertical = TRUE, topToBottom = TRUE, ...)
 }
 \arguments{
 \item{xs}{vector of x coordinates of data points (In case of vertical=FALSE, 
@@ -17,6 +17,9 @@ these are interpreted as y-coordinates)}
 \item{l}{the length of the terminators of the bar}
 
 \item{vertical}{whether the bars are vertical or horizontal}
+
+\item{topToBottom}{whether the error is represented as the distance
+between the top and bottom of the bar, or the middle and the top.}
 
 \item{...}{any other graphical parameters}
 }

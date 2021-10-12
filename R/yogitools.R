@@ -657,6 +657,23 @@ runningFunction <- function(x,y,nbins,fun=mean,logScale=FALSE) {
 }
 
 
+#' rowapply apply a function to a data.frame row
+#' 
+#' This is intended to work similar to apply(x,1,f), but instead of 
+#' coercing the row into vector, they are provided as individual function arguments.
+#' This helps preserve the original data types
+#'
+#' @param tbl a data.frame
+#' @param f a function with parameters matching the column names
+#'
+#' @return a list of the return values of f
+#' @export
+rowApply <- function(tbl,f) {
+  lapply(1:nrow(tbl),function(i) do.call(f,tbl[i,]))
+}
+
+
+
 #' Helper function for drawing p-values over barplots
 #'
 #' @param p p-value

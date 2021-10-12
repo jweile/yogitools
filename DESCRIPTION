@@ -1,6 +1,6 @@
 Package: yogitools
 Title: Yogi Tools
-Version: 0.1.1.9000
+Version: 0.1.2.9000
 Authors@R: person("Jochen", "Weile", email = "jochenweile@gmail.com", role = c("aut", "cre"))
 Description: Yogi Tools is a diverse collection of useful tools for R.
 Depends: R (>= 3.2.3)
@@ -8,4 +8,4 @@ License: GPL
 Encoding: UTF-8
 LazyData: true
 Suggests: testthat
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
