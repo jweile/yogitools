@@ -734,6 +734,49 @@ errorBars <- function(xs,val,err,l=0.01,vertical=TRUE,topToBottom=TRUE,...) {
 	}
 }
 
+#' join multiple datapoints weighted by stdev
+#' @param ms data means
+#' @param sds data stdevs
+#' @param dfs degrees of freedom for each data point
+#' @param ws datapoint weights. By default these get auto-calculated from sds
+#' @return a vector containing the joint mean (mj), joint stdev (sj), and combined degrees of freedom
+weightedAverage <- function(ms,sds,dfs,ws=(1/sds)/sum(1/sds)) {
+  #some safety precautions
+  stopifnot({
+  	length(ms)==length(sds)
+  	length(ms)==length(dfs)
+  	length(ms)==length(ws)
+  })
+  if (length(ms)==0) {
+  	return(c(mj=NaN,sj=NaN,dfj=0))
+  }
+  #weighted mean
+  mj <- sum(ws*ms)
+  #weighted joint variance
+  vj <- sum(ws*(sds^2+ms^2)) -mj^2
+  #return output
+  return(c(mj=mj,sj=sqrt(vj),dfj=sum(dfs)))
+}
+
+
+#' Finds runs of TRUE values in a boolean vector
+#' 
+#' @param bools a logical vector
+#' @return an integer matrix with columns 'start' and 'end' indicating runs
+findRuns <- function(bools) {
+  stopifnot(inherits(bools,"logical"))
+  if (length(bools) == 0) {
+    return(cbind(start=integer(0),end=integer(0)))
+  }
+  runs <- list()
+  changes <- c(
+    bools[[1]]+0,#pretend the outside of the array is "FALSE"
+    bools[-1]-bools[-length(bools)],
+    (bools[[length(bools)]]*-1)
+  )
+  cbind(start=which(changes>0),end=which(changes<0)-1)
+}
+
 # #' Retrieve Protein sequence from UniProt
 # #' 
 # #' Retrieves the amino acid sequence for a given protein identified by
