@@ -740,6 +740,7 @@ errorBars <- function(xs,val,err,l=0.01,vertical=TRUE,topToBottom=TRUE,...) {
 #' @param dfs degrees of freedom for each data point
 #' @param ws datapoint weights. By default these get auto-calculated from sds
 #' @return a vector containing the joint mean (mj), joint stdev (sj), and combined degrees of freedom
+#' @export
 weightedAverage <- function(ms,sds,dfs,ws=(1/sds)/sum(1/sds)) {
   #some safety precautions
   stopifnot({
@@ -763,6 +764,7 @@ weightedAverage <- function(ms,sds,dfs,ws=(1/sds)/sum(1/sds)) {
 #' 
 #' @param bools a logical vector
 #' @return an integer matrix with columns 'start' and 'end' indicating runs
+#' @export
 findRuns <- function(bools) {
   stopifnot(inherits(bools,"logical"))
   if (length(bools) == 0) {
