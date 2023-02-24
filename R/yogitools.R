@@ -455,7 +455,7 @@ colmap <- function(valStops = c(0,1,2), colStops = c("royalblue3","white","fireb
     stop("naCol must be a valid color")
   }
   spacing <- 1/(length(valStops)-1)
-  function(vals) {
+  f <- function(vals) {
     ramp <- colorRamp(colStops)
     trvals <- sapply(vals,function(x) {
       if (is.na(x)) NA
@@ -469,9 +469,71 @@ colmap <- function(valStops = c(0,1,2), colStops = c("royalblue3","white","fireb
     })
     apply(ramp(trvals),1,function(x) if (any(is.na(x))) naCol else do.call(rgb,as.list(x/255)))
   }
+  attr(f,"valStops") <- valStops
+  return(f)
 }
 
 
+#' Draw legend for a color gradient map
+#' 
+#' Draws a legend for a color gradient map created by <code>colmap()</code>.
+#' 
+#' @param cm the colmap object created by colmap()
+#' @param label the label for the legend
+#' @param corner a plot corner described as "top" "topleft","bottomright", etc.
+#'    in which the legend will be drawn. Defaults to "topleft"
+#' @param size a vector of relative width and height of the legend relative to
+#'     size of the plotting area. Defaults to c(0.3,0.15)
+#' @param res resolution of the gradient
+#' @param marginSize size of the legend margin relative to its width. Default 0.2.
+#' @export
+#' @examples
+#' #create colmap object
+#' cm <- colmap(c(0,1,2),c("royalblue3","yellow","firebrick3"),naCol="gray")
+#' #create some fake data
+#' data <- data.frame(x=rnorm(1000,2,4), y=rnorm(1000,1,5), z=cm(rnorm(1000,1,1)))
+#' #plot the data
+#' with(data, plot(x,y, col=z))
+#' #draw the legend
+#' colmapLegend(cm,"z",corner="topright")
+colmapLegend <- function(cm,label,corner="topleft",size=c(0.3,0.15),res=20,marginSize=0.2) {
+  
+  valStops <- attr(cm,"valStops")
+
+  relw=size[[1]] #width of legend box relative plotting area width
+  relh=size[[2]] #height of legend box relative to plotting area height
+  u <- par("usr")
+  uw <- u[[2]]-u[[1]]
+  uh <- u[[4]]-u[[3]]
+
+  leftx <- c(u[[1]],u[[1]]+uw*relw)
+  rightx <- c(u[[2]]-uw*relw,u[[2]])
+  centerx <- c(mean(u[1:2])-(uw*relw/2), mean(u[1:2])+(uw*relw/2))
+  topy <- c(u[[4]]-uh*relh, u[[4]])
+  bottomy <- c( u[[3]], u[[3]]+uh*relh)
+  centery <- c(mean(u[3:4])-(uh*relh/2), mean(u[3:4])+(uh*relh/2))
+
+  corner <- match.arg(corner,c("top","bottom","left","right","topleft","topright","bottomleft","bottomright"))
+  bb <- switch(corner,
+    top=c(centerx,topy),
+    bottom=c(centerx,bottomy),
+    left=c(leftx,centery),
+    right=c(rightx,centery),
+    topleft=c(leftx,topy),
+    topright=c(rightx,topy),
+    bottomleft=c(leftx,bottomy),
+    bottomright=c(rightx,bottomy),
+  )
+  rect(bb[[1]],bb[[3]],bb[[2]],bb[[4]])
+  margin <- uw*relw*marginSize
+  inner <- c(bb[[1]]+margin, bb[[2]]-margin, mean(c(bb[[3]],bb[[4]])), bb[[4]]-margin)
+  xs <- seq(inner[[1]],inner[[2]],length.out=res+1)
+  xvals <- seq(min(valStops),max(valStops),length.out=res)
+  rect(xs[-length(xs)],inner[[3]],xs[-1],inner[[4]],col=cm(xvals),border=NA)
+  xmarks <- inner[[1]] + valStops * (inner[[2]]-inner[[1]]) / (max(valStops)-min(valStops))
+  text(xmarks,inner[[3]],format(valStops),pos=1)
+  text(mean(inner[1:2]),inner[4],label,pos=3)
+}
 
 
 #' Cluster mapper
