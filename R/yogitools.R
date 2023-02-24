@@ -29,34 +29,34 @@ canRead <- function(filename) file.access(filename,mode=4) == 0
 #' }
 getArg <- function(name, default=NULL, required=FALSE) {
 
-	if (length(commandArgs(TRUE)) == 0) {
-		if (required) {
-			stop("Required argument:",name)
-		} else {
-			return(default)
-		}
-	}
+  if (length(commandArgs(TRUE)) == 0) {
+    if (required) {
+      stop("Required argument:",name)
+    } else {
+      return(default)
+    }
+  }
 
-	#tabulate arguments by name
-	argTable <- do.call(rbind,strsplit(commandArgs(TRUE),"="))
-	#get index of argument with given name
-	i <- which(argTable[,1] == name)
+  #tabulate arguments by name
+  argTable <- do.call(rbind,strsplit(commandArgs(TRUE),"="))
+  #get index of argument with given name
+  i <- which(argTable[,1] == name)
 
 
-	if (length(i) == 0) {
-		#return default value if no matching arguments are found.
-		if (required) {
-			stop("Required argument:",name)
-		} else {
-			return(default)
-		}
-	} else if (length(i) > 1) {
-		#if multiple matches are found, throw error message.
-		stop("Multiple values for", name, "found!")
-	} else {
-		#if everything checks out, return the argument value
-		return(argTable[i,2])
-	}
+  if (length(i) == 0) {
+    #return default value if no matching arguments are found.
+    if (required) {
+      stop("Required argument:",name)
+    } else {
+      return(default)
+    }
+  } else if (length(i) > 1) {
+    #if multiple matches are found, throw error message.
+    stop("Multiple values for", name, "found!")
+  } else {
+    #if everything checks out, return the argument value
+    return(argTable[i,2])
+  }
 }
 
 #' Create new Counter
@@ -92,57 +92,57 @@ getArg <- function(name, default=NULL, required=FALSE) {
 #' # foo=7,bar=1
 new.counter <- function() {
 
-	a <- list()
+  a <- list()
 
-	###
-	# Add x occurrences to item id
-	#
-	add <- function(id,x) {
-		if (!is.character(id)) {
-			stop("Illegal argument:",id)
-		}
-		if (is.null(a[[id]])) {
-			a[[id]] <<- x
-		} else {
-			a[[id]] <<- a[[id]] + x
-		}
-	}
+  ###
+  # Add x occurrences to item id
+  #
+  add <- function(id,x) {
+    if (!is.character(id)) {
+      stop("Illegal argument:",id)
+    }
+    if (is.null(a[[id]])) {
+      a[[id]] <<- x
+    } else {
+      a[[id]] <<- a[[id]] + x
+    }
+  }
 
-	# increase counter for item id by 1
-	inc <- function(id) add(id,1)
+  # increase counter for item id by 1
+  inc <- function(id) add(id,1)
 
-	# get the counter state for id
-	get <- function(id) a[[id]]
+  # get the counter state for id
+  get <- function(id) a[[id]]
 
-	# list counts for all ids
-	ls <- function() a
+  # list counts for all ids
+  ls <- function() a
 
-	# export counter state as a string
-	export <- function() {
-		paste(lapply(names(a), function(id) paste(id,"=",a[[id]],sep="") ), collapse=",")
-	}
+  # export counter state as a string
+  export <- function() {
+    paste(lapply(names(a), function(id) paste(id,"=",a[[id]],sep="") ), collapse=",")
+  }
 
-	# import counter state from string
-	import.add <- function(strs) { 
-		lapply(strsplit(strs,","), function(eqs) {
-			lapply(strsplit(eqs,"="), function(vals) {
-				add(vals[[1]],as.numeric(vals[[2]]))
-			})
-		})
-		invisible()
-	}
+  # import counter state from string
+  import.add <- function(strs) { 
+    lapply(strsplit(strs,","), function(eqs) {
+      lapply(strsplit(eqs,"="), function(vals) {
+        add(vals[[1]],as.numeric(vals[[2]]))
+      })
+    })
+    invisible()
+  }
 
-	structure(
-		list(
-			inc = inc,
-			add = add,
-			get = get,
-			ls = ls,
-			export = export,
-			import.add = import.add
-		),
-		class="yogicounter"
-	)
+  structure(
+    list(
+      inc = inc,
+      add = add,
+      get = get,
+      ls = ls,
+      export = export,
+      import.add = import.add
+    ),
+    class="yogicounter"
+  )
 }
 
 #' 3D-bind matrices
@@ -154,10 +154,10 @@ new.counter <- function() {
 #' @return A 3D array of the bound matrices
 #' @export
 zbind <- function(...) {
-	x <- list(...)
-	y <- array(0,dim=c(nrow(x[[1]]),ncol(x[[1]]),length(x)),dimnames=dimnames(x[[1]]))
-	for (i in 1:length(x)) y[,,i] <- x[[i]]
-	y
+  x <- list(...)
+  y <- array(0,dim=c(nrow(x[[1]]),ncol(x[[1]]),length(x)),dimnames=dimnames(x[[1]]))
+  for (i in 1:length(x)) y[,,i] <- x[[i]]
+  y
 }
 
 #' Extract regex groups (local)
@@ -172,14 +172,14 @@ zbind <- function(...) {
 #' @keywords regular expression groups
 #' @export
 extract.groups <- function(x, re) {
-	matches <- regexpr(re,x,perl=TRUE)
-	start <- attr(matches,"capture.start")
-	end <- start + attr(matches,"capture.length") - 1
-	do.call(cbind,lapply(1:ncol(start), function(i) {
-		sapply(1:nrow(start),function(j){
-			if (start[j,i] > -1) substr(x[[j]],start[j,i],end[j,i]) else NA
-		})
-	}))
+  matches <- regexpr(re,x,perl=TRUE)
+  start <- attr(matches,"capture.start")
+  end <- start + attr(matches,"capture.length") - 1
+  do.call(cbind,lapply(1:ncol(start), function(i) {
+    sapply(1:nrow(start),function(j){
+      if (start[j,i] > -1) substr(x[[j]],start[j,i],end[j,i]) else NA
+    })
+  }))
 }
 
 #' Extract regex groups (global)
@@ -241,24 +241,24 @@ ith.rank <- function(values, i, high=TRUE) sort(values,decreasing=high)[[i]]
 #' mccval <- mcc(21,patientDiganosticScore,patientHasDisease)
 mcc <- function(t, scores, truth) {
 
-	# exclude <- is.na(scores) | is.na(truth)
-	# scores <- scores[-exclude]
-	# truth <- truth[-exclude]
+  # exclude <- is.na(scores) | is.na(truth)
+  # scores <- scores[-exclude]
+  # truth <- truth[-exclude]
 
-	.truth <- truth == 1
-	.calls <- scores >= t
+  .truth <- truth == 1
+  .calls <- scores >= t
 
-	tp <- sum(.truth & .calls)
-	tn <- sum(!.truth & !.calls)
-	fp <- sum(.calls & !.truth)
-	fn <- sum(.truth & !.calls)
+  tp <- sum(.truth & .calls)
+  tn <- sum(!.truth & !.calls)
+  fp <- sum(.calls & !.truth)
+  fn <- sum(.truth & !.calls)
 
-	# mcc <- (tp * tn - fp * fn)/sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn))
-	#this formula prevents integer overflow errors
-	mcc <- exp( log(tp*tn - fp*fn) - ( log(tp+fp) + log(tp+fn) + log(tn+fp) + log(tn+fn) )/2 )
-	prec <- tp/(tp+fp)
-	recall <- tp/(tp+fn)
-	c(mcc=mcc,prec=prec,recall=recall)
+  # mcc <- (tp * tn - fp * fn)/sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn))
+  #this formula prevents integer overflow errors
+  mcc <- exp( log(tp*tn - fp*fn) - ( log(tp+fp) + log(tp+fn) + log(tn+fp) + log(tn+fn) )/2 )
+  prec <- tp/(tp+fp)
+  recall <- tp/(tp+fn)
+  c(mcc=mcc,prec=prec,recall=recall)
 }
 
 
@@ -275,12 +275,12 @@ mcc <- function(t, scores, truth) {
 #' x <- rbind(list(a=1,b="foo"),list(a=2,b="bar"))
 #' y <- to.df(x)
 to.df <- function(x) {
-	if (is.null(x)) return(NULL)
-	y <- lapply(1:ncol(x), function(col) {
-		unlist(x[,col])
-	})
-	names(y) <- colnames(x)
-	as.data.frame(y,stringsAsFactors=FALSE)
+  if (is.null(x)) return(NULL)
+  y <- lapply(1:ncol(x), function(col) {
+    unlist(x[,col])
+  })
+  names(y) <- colnames(x)
+  as.data.frame(y,stringsAsFactors=FALSE)
 }
 
 #' Convert list of lists into data.frame
@@ -292,9 +292,9 @@ to.df <- function(x) {
 #' @examples
 #' x <- as.df(list(list(a=1,b="foo"),list(a=2,b="bar")))
 as.df <- function(x) {
-	df <- as.data.frame(lapply(1:length(x[[1]]),function(i) sapply(x,`[[`,i) ), stringsAsFactors=FALSE)
-	colnames(df) <- names(x[[1]])
-	df
+  df <- as.data.frame(lapply(1:length(x[[1]]),function(i) sapply(x,`[[`,i) ), stringsAsFactors=FALSE)
+  colnames(df) <- names(x[[1]])
+  df
 }
 
 #' Remove infinite and NA values 
@@ -310,11 +310,11 @@ as.df <- function(x) {
 #' fin(c(1,2,NA,3))
 #' fin(data.frame(a=c(1,2,NA,3),b=c(4,5,6,7)))
 fin <- function(x) {
-	if (inherits(x,"data.frame") || inherits(x,"matrix")) {
-		x[apply(x,1,function(.x) all(!is.na(.x) & is.finite(.x))),]
-	} else {
-		x[!is.na(x) & is.finite(x)]
-	}
+  if (inherits(x,"data.frame") || inherits(x,"matrix")) {
+    x[apply(x,1,function(.x) all(!is.na(.x) & is.finite(.x))),]
+  } else {
+    x[!is.na(x) & is.finite(x)]
+  }
 }
 
 
@@ -328,12 +328,12 @@ fin <- function(x) {
 #' @examples
 #' q2c("C_A08")
 q2c <- function(x) {
-	q <- which(LETTERS==substr(x,1,1))
-	r <- which(LETTERS==substr(x,3,3))
-	c <- as.numeric(substr(x,4,nchar(x)))
-	.r <- r*2 - (q<3)
-	.c <- c*2 - q%%2
-	paste(LETTERS[[.r]],sprintf("%02d",.c),sep="")
+  q <- which(LETTERS==substr(x,1,1))
+  r <- which(LETTERS==substr(x,3,3))
+  c <- as.numeric(substr(x,4,nchar(x)))
+  .r <- r*2 - (q<3)
+  .c <- c*2 - q%%2
+  paste(LETTERS[[.r]],sprintf("%02d",.c),sep="")
 }
 
 #' Convert from Raw coordinate to Quadrant address
@@ -346,12 +346,12 @@ q2c <- function(x) {
 #' @examples
 #' c2q("B15")
 c2q <- function(x) {
-	r <- which(LETTERS==substr(x,1,1))
-	c <- as.numeric(substr(x,2,nchar(x)))
-	.r <- ceiling(r/2)
-	.c <- ceiling(c/2)
-	.q <- ((r-1)%%2)*2 + (c-1)%%2+1
-	paste(LETTERS[[.q]],"_",LETTERS[[.r]],sprintf("%02d",.c),sep="")
+  r <- which(LETTERS==substr(x,1,1))
+  c <- as.numeric(substr(x,2,nchar(x)))
+  .r <- ceiling(r/2)
+  .c <- ceiling(c/2)
+  .q <- ((r-1)%%2)*2 + (c-1)%%2+1
+  paste(LETTERS[[.q]],"_",LETTERS[[.r]],sprintf("%02d",.c),sep="")
 }
 
 
@@ -364,10 +364,10 @@ c2q <- function(x) {
 #' @examples
 #' combo(1:4)
 combo <- function(l) {
-	do.call(c,lapply(1:length(l),function(n){
-		tab <- combn(l,n)
-		lapply(1:ncol(tab),function(i)tab[,i])
-	}))
+  do.call(c,lapply(1:length(l),function(n){
+    tab <- combn(l,n)
+    lapply(1:ncol(tab),function(i)tab[,i])
+  }))
 }
 
 
@@ -380,10 +380,10 @@ combo <- function(l) {
 #' @examples
 #' nucleotides <- toChars("ACTTGCTAAACTTGA")
 toChars <- function(str) {
-	if (!is.character(str) || length(str) != 1) {
-		stop("input must be a single character string")
-	}
-	sapply(1:nchar(str), function(i) substr(str,i,i))
+  if (!is.character(str) || length(str) != 1) {
+    stop("input must be a single character string")
+  }
+  sapply(1:nchar(str), function(i) substr(str,i,i))
 }
 
 #' Checks if a string is a valid color
@@ -397,12 +397,12 @@ toChars <- function(str) {
 #' @examples
 #' is.color(c(NA, "black", "blackk", "1", "#00", "#000000"))
 is.color <- function(str) {
-	sapply(str, function(x) {
-		tryCatch(
-			is.matrix(col2rgb(x)), 
-			error = function(e) FALSE
-		)
-	})
+  sapply(str, function(x) {
+    tryCatch(
+      is.matrix(col2rgb(x)), 
+      error = function(e) FALSE
+    )
+  })
 }
 
 #' Add alpha channel
@@ -415,16 +415,16 @@ is.color <- function(str) {
 #' @examples
 #' transparentChartreuse <- colAlpha("chartreuse3",0.3)
 colAlpha <- function(color, alpha) {
-	if (length(color) != 1) {
-		stop("argument 'color' can only be a single value!")
-	}
-	if (length(alpha) != 1 || !is.numeric(alpha) || alpha < 0 || alpha > 1) {
-		stop("alpha must be a single numerical value between 0 and 1")
-	}
-	if (!is.color(color)) {
-		stop("argument 'color' must be a valid color!")
-	}
-	do.call(rgb,as.list(c(col2rgb(color)[,1],alpha=alpha*255,maxColorValue=255)))
+  if (length(color) != 1) {
+    stop("argument 'color' can only be a single value!")
+  }
+  if (length(alpha) != 1 || !is.numeric(alpha) || alpha < 0 || alpha > 1) {
+    stop("alpha must be a single numerical value between 0 and 1")
+  }
+  if (!is.color(color)) {
+    stop("argument 'color' must be a valid color!")
+  }
+  do.call(rgb,as.list(c(col2rgb(color)[,1],alpha=alpha*255,maxColorValue=255)))
 }
 
 
@@ -448,27 +448,27 @@ colAlpha <- function(color, alpha) {
 #' mycolmap <- colmap(c(0,1,2),c("royalblue3","white","firebrick3"),naCol="gray")
 #' mycolors <- mycolmap(seq(0,2,0.01))
 colmap <- function(valStops = c(0,1,2), colStops = c("royalblue3","white","firebrick3"), naCol="gray") {
-	if (!all(is.color(colStops))){
-		stop("colStops must contain valid colors")
-	}
-	if (!is.color(naCol)) {
-		stop("naCol must be a valid color")
-	}
-	spacing <- 1/(length(valStops)-1)
-	function(vals) {
-		ramp <- colorRamp(colStops)
-		trvals <- sapply(vals,function(x) {
-			if (is.na(x)) NA
-			else if (x <= valStops[[1]]) 0
-			else if (x >= valStops[[length(valStops)]]) 1
-			else {
-				stopIdx <- if (!any(valStops > x)) 1 else which(valStops > x)[[1]]-1
-				offset <- (x-valStops[[stopIdx]])/(valStops[[stopIdx+1]]-valStops[[stopIdx]])
-				spacing*(stopIdx-1) + offset*spacing
-			}
-		})
-		apply(ramp(trvals),1,function(x) if (any(is.na(x))) naCol else do.call(rgb,as.list(x/255)))
-	}
+  if (!all(is.color(colStops))){
+    stop("colStops must contain valid colors")
+  }
+  if (!is.color(naCol)) {
+    stop("naCol must be a valid color")
+  }
+  spacing <- 1/(length(valStops)-1)
+  function(vals) {
+    ramp <- colorRamp(colStops)
+    trvals <- sapply(vals,function(x) {
+      if (is.na(x)) NA
+      else if (x <= valStops[[1]]) 0
+      else if (x >= valStops[[length(valStops)]]) 1
+      else {
+        stopIdx <- if (!any(valStops > x)) 1 else which(valStops > x)[[1]]-1
+        offset <- (x-valStops[[stopIdx]])/(valStops[[stopIdx+1]]-valStops[[stopIdx]])
+        spacing*(stopIdx-1) + offset*spacing
+      }
+    })
+    apply(ramp(trvals),1,function(x) if (any(is.na(x))) naCol else do.call(rgb,as.list(x/255)))
+  }
 }
 
 
@@ -497,22 +497,22 @@ colmap <- function(valStops = c(0,1,2), colStops = c("royalblue3","white","fireb
 #' cmap$addLink(1,5)
 #' cmap$getClusters()
 new.cluster.map <- function(n) {
-	
-	.clusters <- as.list(1:n)
+  
+  .clusters <- as.list(1:n)
 
-	.getIdx <- function(i) which(sapply(.clusters,function(x) i %in% x))
+  .getIdx <- function(i) which(sapply(.clusters,function(x) i %in% x))
 
-	addLink <- function(i,j) {
-		i.idx <- .getIdx(i)
-		j.idx <- .getIdx(j)
-		joint <- union(.clusters[[i.idx]],.clusters[[j.idx]])
-		.clusters[c(i.idx,j.idx)] <<- NULL
-		.clusters[[length(.clusters)+1]] <<- joint
-	}
+  addLink <- function(i,j) {
+    i.idx <- .getIdx(i)
+    j.idx <- .getIdx(j)
+    joint <- union(.clusters[[i.idx]],.clusters[[j.idx]])
+    .clusters[c(i.idx,j.idx)] <<- NULL
+    .clusters[[length(.clusters)+1]] <<- joint
+  }
 
-	getClusters <- function() .clusters
+  getClusters <- function() .clusters
 
-	list(addLink=addLink, getClusters=getClusters, getIdxOf=.getIdx)
+  list(addLink=addLink, getClusters=getClusters, getIdxOf=.getIdx)
 }
 
 
@@ -540,77 +540,77 @@ new.cluster.map <- function(n) {
 #' topoScatter(x,y,log="xy",resolution=60,xlab="foo",ylab="bar")
 #'
 topoScatter <- function(x,y,resolution=20,thresh=5,
-					topoCol=colorRampPalette(c("black","red","yellow"))(20), maxFreq=NULL,
-					xlim=range(x,na.rm=TRUE),ylim=range(y,na.rm=TRUE),log="",...) {
+          topoCol=colorRampPalette(c("black","red","yellow"))(20), maxFreq=NULL,
+          xlim=range(x,na.rm=TRUE),ylim=range(y,na.rm=TRUE),log="",...) {
 
-	if (length(x) != length(y)) {
-		stop("x and y must be of same length!")
-	}
+  if (length(x) != length(y)) {
+    stop("x and y must be of same length!")
+  }
 
-	#remove infinite values and na
-	fin2 <- function(x) x[apply(x,1,function(.x) all(!is.na(.x) & is.finite(.x))),]
-	xy <- cbind(x,y)
-	xy <- fin2(xy)
-	x <- xy[,1]
-	y <- xy[,2]
+  #remove infinite values and na
+  fin2 <- function(x) x[apply(x,1,function(.x) all(!is.na(.x) & is.finite(.x))),]
+  xy <- cbind(x,y)
+  xy <- fin2(xy)
+  x <- xy[,1]
+  y <- xy[,2]
 
-	widenRange <- function(x) {
-		a <- x[[1]]
-		b <- x[[2]]
-		.a <- a - (b-a)/10000
-		.b <- b + (b-a)/10000
-		if (a > 0 && .a < 0) .a <- a/10
-		return(c(.a,.b))
-	}
-	xlim <- widenRange(xlim)
-	ylim <- widenRange(ylim)
+  widenRange <- function(x) {
+    a <- x[[1]]
+    b <- x[[2]]
+    .a <- a - (b-a)/10000
+    .b <- b + (b-a)/10000
+    if (a > 0 && .a < 0) .a <- a/10
+    return(c(.a,.b))
+  }
+  xlim <- widenRange(xlim)
+  ylim <- widenRange(ylim)
 
-	xBins <- if (regexpr("x",log) > 0) {
-		exp(log(10)*seq(log10(xlim[[1]]),log10(xlim[[2]]),length.out=resolution))
-	} else {
-		seq(xlim[[1]],xlim[[2]],length.out=resolution)
-	}
-	yBins <- if (regexpr("y",log) > 0) {
-		exp(log(10)*seq(log10(ylim[[1]]),log10(ylim[[2]]),length.out=resolution))
-	} else {
-		seq(ylim[[1]],ylim[[2]],length.out=resolution)
-	}
-	bins <- matrix(0,ncol=length(xBins)-1,nrow=length(yBins)-1)
+  xBins <- if (regexpr("x",log) > 0) {
+    exp(log(10)*seq(log10(xlim[[1]]),log10(xlim[[2]]),length.out=resolution))
+  } else {
+    seq(xlim[[1]],xlim[[2]],length.out=resolution)
+  }
+  yBins <- if (regexpr("y",log) > 0) {
+    exp(log(10)*seq(log10(ylim[[1]]),log10(ylim[[2]]),length.out=resolution))
+  } else {
+    seq(ylim[[1]],ylim[[2]],length.out=resolution)
+  }
+  bins <- matrix(0,ncol=length(xBins)-1,nrow=length(yBins)-1)
 
-	for (i in 1:length(x)) {
-		xbi <- max(which(xBins <= x[[i]]))
-		ybi <- max(which(yBins <= y[[i]]))
-		bins[[ybi,xbi]] <- bins[[ybi,xbi]]+1
-	}
+  for (i in 1:length(x)) {
+    xbi <- max(which(xBins <= x[[i]]))
+    ybi <- max(which(yBins <= y[[i]]))
+    bins[[ybi,xbi]] <- bins[[ybi,xbi]]+1
+  }
 
-	restFilter <- sapply(1:length(x),function(i) {
-		xbi <- max(which(xBins <= x[[i]]))
-		ybi <- max(which(yBins <= y[[i]]))
-		bins[[ybi,xbi]] <= thresh
-	})
-	xRest <- x[restFilter]
-	yRest <- y[restFilter]
+  restFilter <- sapply(1:length(x),function(i) {
+    xbi <- max(which(xBins <= x[[i]]))
+    ybi <- max(which(yBins <= y[[i]]))
+    bins[[ybi,xbi]] <= thresh
+  })
+  xRest <- x[restFilter]
+  yRest <- y[restFilter]
 
-	maxFreq <- if (is.null(maxFreq)) max(bins) else {
-		if (maxFreq < max(bins)) max(bins) else maxFreq
-	}
-	cat("maxFreq =",maxFreq,"\n")
+  maxFreq <- if (is.null(maxFreq)) max(bins) else {
+    if (maxFreq < max(bins)) max(bins) else maxFreq
+  }
+  cat("maxFreq =",maxFreq,"\n")
 
-	colMap <- apply(bins,c(1,2),function(v) {
-		ci <- round((v/maxFreq) * (length(topoCol)-1) + 1)
-		topoCol[[ci]]
-	})
+  colMap <- apply(bins,c(1,2),function(v) {
+    ci <- round((v/maxFreq) * (length(topoCol)-1) + 1)
+    topoCol[[ci]]
+  })
 
-	plot(NULL,type="n",xlim=xlim,ylim=ylim,log=log,...)
+  plot(NULL,type="n",xlim=xlim,ylim=ylim,log=log,...)
 
-	points(xRest,yRest,pch=20)
-	for (xbi in 1:ncol(bins)) {
-		for (ybi in 1:nrow(bins)) {
-			if (bins[ybi,xbi] > thresh) {
-				rect(xBins[[xbi]],yBins[[ybi]],xBins[[xbi+1]],yBins[[ybi+1]],col=colMap[ybi,xbi],border=NA)
-			}
-		}
-	}
+  points(xRest,yRest,pch=20)
+  for (xbi in 1:ncol(bins)) {
+    for (ybi in 1:nrow(bins)) {
+      if (bins[ybi,xbi] > thresh) {
+        rect(xBins[[xbi]],yBins[[ybi]],xBins[[xbi+1]],yBins[[ybi+1]],col=colMap[ybi,xbi],border=NA)
+      }
+    }
+  }
 
 }
 
@@ -627,33 +627,33 @@ topoScatter <- function(x,y,resolution=20,thresh=5,
 #' @return a matrix with two columns: bin centroid, and value of fun
 #' @export
 runningFunction <- function(x,y,nbins,fun=mean,logScale=FALSE) {
-	if (length(x) != length(y)) {
-		stop("x and y must be of equal length!")
-	}
-	if (!is.numeric(x) || !is.numeric(y)) {
-		stop("x and y must be numeric!")
-	}
-	if (logScale) {
-		if (any(x <= 0)) {
-			warning("Ignoring infinite values and values <= 0 on x-axis!")
-			bad <- x <= 0 | is.infinite(x)
-			x <- x[!bad]
-			y <- y[!bad]
-		}
-		x <- log10(x)
-		# width <- log10(width)
-	}
-	rng <- range(x,na.rm=TRUE,finite=TRUE)
-	binSides <- seq(rng[[1]],rng[[2]],length.out=nbins)
-	binMids <- binSides[-1]-(rng[[2]]-rng[[1]])/(2*nbins)
-	out <- sapply(1:length(binMids), function(i) {
-		bin <- y[which(x > binSides[[i]] & x <= binSides[[i+1]])]
-		fun(bin)
-	})
-	if (logScale) {
-		binMids <- 10^binMids
-	}
-	cbind(binMids,out)
+  if (length(x) != length(y)) {
+    stop("x and y must be of equal length!")
+  }
+  if (!is.numeric(x) || !is.numeric(y)) {
+    stop("x and y must be numeric!")
+  }
+  if (logScale) {
+    if (any(x <= 0)) {
+      warning("Ignoring infinite values and values <= 0 on x-axis!")
+      bad <- x <= 0 | is.infinite(x)
+      x <- x[!bad]
+      y <- y[!bad]
+    }
+    x <- log10(x)
+    # width <- log10(width)
+  }
+  rng <- range(x,na.rm=TRUE,finite=TRUE)
+  binSides <- seq(rng[[1]],rng[[2]],length.out=nbins)
+  binMids <- binSides[-1]-(rng[[2]]-rng[[1]])/(2*nbins)
+  out <- sapply(1:length(binMids), function(i) {
+    bin <- y[which(x > binSides[[i]] & x <= binSides[[i+1]])]
+    fun(bin)
+  })
+  if (logScale) {
+    binMids <- 10^binMids
+  }
+  cbind(binMids,out)
 }
 
 
@@ -685,32 +685,32 @@ rowApply <- function(tbl,f) {
 #' @return nothing
 #' @export
 drawPvalBracket <- function(p,i,j,h=1.1,s=0.02,th=0.02) {
-	#choose the correct notation and build an expression object accordingly
-	pExpr <- if (p < 0.001) {
-		#if p=0, then the p-value is smaller than the numerical
-		#  precision of the test, so we can only indicate that it's smaller than 2.2e-16
-		if (p < 2.2e-16) {
-			#build math expression
-			expression(p < 2.2%*%10^-16)
-		} else {
-			#use scientific notation for values < 0.001
-			#first, extract the exponent
-			expo <- floor(log10(p))
-			#then extract the mantissa
-			sfd <- signif(p*10^-expo,digits=3)
-			#use bquote to interpolate mantissa and exponent into math expression
-			bquote(p == .(sfd)%*%10^.(expo))
-		}
-	} else {
-		#use regular decimal noation for values > 0.001
-		sprintf("p = %.03f",p)
-	}
-	#draw the bracket
-	lines(c(i+s,i+s,j-s,j-s),c(h-th,h,h,h-th))
-	#draw the p-value expression
-	text(mean(c(i,j)),h,pExpr,pos=3,cex=0.7)
-	#return nothing
-	return(invisible(NULL))
+  #choose the correct notation and build an expression object accordingly
+  pExpr <- if (p < 0.001) {
+    #if p=0, then the p-value is smaller than the numerical
+    #  precision of the test, so we can only indicate that it's smaller than 2.2e-16
+    if (p < 2.2e-16) {
+      #build math expression
+      expression(p < 2.2%*%10^-16)
+    } else {
+      #use scientific notation for values < 0.001
+      #first, extract the exponent
+      expo <- floor(log10(p))
+      #then extract the mantissa
+      sfd <- signif(p*10^-expo,digits=3)
+      #use bquote to interpolate mantissa and exponent into math expression
+      bquote(p == .(sfd)%*%10^.(expo))
+    }
+  } else {
+    #use regular decimal noation for values > 0.001
+    sprintf("p = %.03f",p)
+  }
+  #draw the bracket
+  lines(c(i+s,i+s,j-s,j-s),c(h-th,h,h,h-th))
+  #draw the p-value expression
+  text(mean(c(i,j)),h,pExpr,pos=3,cex=0.7)
+  #return nothing
+  return(invisible(NULL))
 }
 
 #' Helper function for drawing error bars
@@ -726,12 +726,12 @@ drawPvalBracket <- function(p,i,j,h=1.1,s=0.02,th=0.02) {
 #' @param ... any other graphical parameters
 #' @export
 errorBars <- function(xs,val,err,l=0.01,vertical=TRUE,topToBottom=TRUE,...) {
-	factor <- ifelse(topToBottom,2,1)
-	if (vertical) {
-		arrows(xs,val-err/factor,xs,val+err/factor,length=l,angle=90,code=3,...)
-	} else {
-		arrows(val-err/factor,xs,val+err/factor,xs,length=l,angle=90,code=3,...)
-	}
+  factor <- ifelse(topToBottom,2,1)
+  if (vertical) {
+    arrows(xs,val-err/factor,xs,val+err/factor,length=l,angle=90,code=3,...)
+  } else {
+    arrows(val-err/factor,xs,val+err/factor,xs,length=l,angle=90,code=3,...)
+  }
 }
 
 #' join multiple datapoints weighted by stdev
@@ -744,12 +744,12 @@ errorBars <- function(xs,val,err,l=0.01,vertical=TRUE,topToBottom=TRUE,...) {
 weightedAverage <- function(ms,sds,dfs,ws=(1/sds)/sum(1/sds)) {
   #some safety precautions
   stopifnot({
-  	length(ms)==length(sds)
-  	length(ms)==length(dfs)
-  	length(ms)==length(ws)
+    length(ms)==length(sds)
+    length(ms)==length(dfs)
+    length(ms)==length(ws)
   })
   if (length(ms)==0) {
-  	return(c(mj=NaN,sj=NaN,dfj=0))
+    return(c(mj=NaN,sj=NaN,dfj=0))
   }
   #weighted mean
   mj <- sum(ws*ms)
@@ -788,32 +788,32 @@ findRuns <- function(bools) {
 # #' @export
 # getUniprotSeq <- function(uniprot.acc) {
 
-# 	url <- paste0("https://www.uniprot.org/uniprot/",uniprot.acc,".fasta")
+#   url <- paste0("https://www.uniprot.org/uniprot/",uniprot.acc,".fasta")
 
-# 	readFASTA <- function(file) {
-# 		lines <- scan(file,what="character",sep="\n")
-# 		if (length(lines) < 2) {
-# 			stop("Invalid FASTA format in ",file)
-# 		}
-# 		if (substr(lines[[1]],1,1) != ">") {
-# 			stop("Missing FASTA header in ",file)
-# 		}
-# 		paste(lines[-1],collapse="")
-# 	}
+#   readFASTA <- function(file) {
+#     lines <- scan(file,what="character",sep="\n")
+#     if (length(lines) < 2) {
+#       stop("Invalid FASTA format in ",file)
+#     }
+#     if (substr(lines[[1]],1,1) != ">") {
+#       stop("Missing FASTA header in ",file)
+#     }
+#     paste(lines[-1],collapse="")
+#   }
 
-# 	prot <- readFASTA(url)
+#   prot <- readFASTA(url)
 
-# 	sapply(1:nchar(prot),function(i)substr(prot,i,i))
+#   sapply(1:nchar(prot),function(i)substr(prot,i,i))
 
 # }
 
 # provean.input <- function(uniprot.acc,wt.aa) {
-# 	aas <- c("A","V","L","I","M","F","Y","W","R","H","K","D","E","S","T","N","Q","G","C","P")
-# 	featable <- expand.grid(pos=1:length(wt.aa),mut.aa=aas)
-# 	provean.in <- data.frame(protein=uniprot.acc,pos=featable$pos,
-# 		wt=wt.aa[featable$pos],mut=featable$mut.aa
-# 	)
-# 	write.table(provean.in,paste0(uniprot.acc,"_provean_input.txt"),
-# 		sep="\t",row.names=FALSE,col.names=FALSE,quote=FALSE
-# 	)
+#   aas <- c("A","V","L","I","M","F","Y","W","R","H","K","D","E","S","T","N","Q","G","C","P")
+#   featable <- expand.grid(pos=1:length(wt.aa),mut.aa=aas)
+#   provean.in <- data.frame(protein=uniprot.acc,pos=featable$pos,
+#     wt=wt.aa[featable$pos],mut=featable$mut.aa
+#   )
+#   write.table(provean.in,paste0(uniprot.acc,"_provean_input.txt"),
+#     sep="\t",row.names=FALSE,col.names=FALSE,quote=FALSE
+#   )
 # }
