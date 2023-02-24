@@ -530,7 +530,7 @@ colmapLegend <- function(cm,label,corner="topleft",size=c(0.3,0.15),res=20,margi
   xs <- seq(inner[[1]],inner[[2]],length.out=res+1)
   xvals <- seq(min(valStops),max(valStops),length.out=res)
   rect(xs[-length(xs)],inner[[3]],xs[-1],inner[[4]],col=cm(xvals),border=NA)
-  xmarks <- inner[[1]] + valStops * (inner[[2]]-inner[[1]]) / (max(valStops)-min(valStops))
+  xmarks <- inner[[1]] + (valStops-min(valStops)) * (inner[[2]]-inner[[1]]) / (max(valStops)-min(valStops))
   text(xmarks,inner[[3]],format(valStops),pos=1)
   text(mean(inner[1:2]),inner[4],label,pos=3)
 }
