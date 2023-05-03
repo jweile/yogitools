@@ -2,7 +2,7 @@
 % Please edit documentation in R/yogitools.R
 \name{rowApply}
 \alias{rowApply}
-\title{rowapply apply a function to a data.frame row}
+\title{apply a function to a data.frame's rows}
 \usage{
 rowApply(tbl, f)
 }

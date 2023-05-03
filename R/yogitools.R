@@ -719,7 +719,7 @@ runningFunction <- function(x,y,nbins,fun=mean,logScale=FALSE) {
 }
 
 
-#' rowapply apply a function to a data.frame row
+#' apply a function to a data.frame's rows
 #' 
 #' This is intended to work similar to apply(x,1,f), but instead of 
 #' coercing the row into vector, they are provided as individual function arguments.
@@ -734,6 +734,23 @@ rowApply <- function(tbl,f) {
   lapply(1:nrow(tbl),function(i) do.call(f,tbl[i,]))
 }
 
+#' envelop a function in another
+#' 
+#' This is intended to help with apply statements, where one may want 
+#' to pass a function that simply wraps one function in another
+#' 
+#' @param f the inner funtion
+#' @param g the outer function
+#' @param a new function that simply wraps the inner inside the outer function
+#' @export
+#' @examples
+#' #an example matrix with some NA values in it
+#' mat <- sample(c(NA,1:5),100,replace=TRUE)|>matrix(nrow=20)
+#' #find all rows that don't have NA values in them
+#' cleanRows <- apply(mat, 1, is.na %>% any %>% `!`)
+`%>%` <- function(f,g) {
+  function(...) g(f(...))
+}
 
 
 #' Helper function for drawing p-values over barplots
